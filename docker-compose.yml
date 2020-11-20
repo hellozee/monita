@@ -12,6 +12,8 @@ services:
       MYSQL_PASSWORD: pass
     ports:
       - 3306:3306
+    volumes:
+      - ./resources/init.sql:/docker-entrypoint-initdb.d/init.sql
 
     networks:
       - monitanet
@@ -33,8 +35,36 @@ services:
       - 8080:8080
     depends_on:
       - db
-    links:
+
+  mysqlexporter:
+    container_name: mysqlexporter
+    image: prom/mysqld-exporter
+    hostname: mysqlexporter
+    environment:
+      DATA_SOURCE_NAME: "monita:pass@(db:3306)/"
+      GET_HOSTS_FROM: dns
+    ports:
+      - 9104:9104
+    networks:
+      - monitanet
+    depends_on:
       - db
+
+  prometheus:
+    container_name: prometheus_monita
+    image: prom/prometheus
+    hostname: prometheus
+    environment:
+      GET_HOSTS_FROM: dns
+    ports:
+      - 9090:9090
+    networks:
+      - monitanet
+    depends_on:
+      - mysqlexporter
+      - monitaapi
+    volumes:
+      - ./resources/prometheus.yml:/etc/prometheus/prometheus.yml
 
 networks:
   monitanet:
