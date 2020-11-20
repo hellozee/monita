@@ -11,21 +11,37 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var Tasks TaskModel
 
+var (
+	requestsCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: "monita",
+			Subsystem: "service",
+			Name:      "processed_total",
+			Help:      "Total number of requests processed by the service",
+		},
+		[]string{"type"},
+	)
+)
+
 func init() {
 	Tasks = NewTaskModel()
+	prometheus.MustRegister(requestsCounter)
 }
 
 func main() {
-	l := log.New(os.Stdout, "product-api", log.LstdFlags)
+	l := log.New(os.Stdout, "todo-api", log.LstdFlags)
 
 	sm := mux.NewRouter()
 
 	getRouter := sm.Methods("GET").Subrouter()
 	getRouter.HandleFunc("/api/v1/items", getItems)
+	getRouter.Handle("/metrics", promhttp.Handler())
 
 	putRouter := sm.Methods("PUT").Subrouter()
 	putRouter.HandleFunc("/api/v1/{id:[0-9]+}", deleteItem)
@@ -34,7 +50,7 @@ func main() {
 	postRouter.HandleFunc("/api/v1/", addItem)
 
 	s := &http.Server{
-		Addr:         ":9090",
+		Addr:         ":8080",
 		Handler:      sm,
 		IdleTimeout:  120 * time.Second,
 		ReadTimeout:  1 * time.Second,
@@ -54,22 +70,28 @@ func main() {
 
 	sig := <-sigChan
 	l.Println("Terminating Server ", sig)
-	tc, _ := context.WithTimeout(context.Background(), 30*time.Second)
+	tc, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	s.Shutdown(tc)
+	cancel()
 }
 
 func getItems(rw http.ResponseWriter, rq *http.Request) {
 	rw.Header().Set("Content-Type", "application/json")
 	rw.Write(Tasks.ToJSON())
+	requestsCounter.WithLabelValues("get_items").Inc()
 }
 
 func addItem(rw http.ResponseWriter, rq *http.Request) {
 	bytes, _ := ioutil.ReadAll(rq.Body)
 	Tasks.AddTask(string(bytes))
+	rw.WriteHeader(http.StatusOK)
+	requestsCounter.WithLabelValues("add_item").Inc()
 }
 
 func deleteItem(rw http.ResponseWriter, rq *http.Request) {
 	vars := mux.Vars(rq)
 	id, _ := strconv.Atoi(vars["id"])
 	Tasks.DeleteTask(id)
+	rw.WriteHeader(http.StatusOK)
+	requestsCounter.WithLabelValues("delete_item").Inc()
 }
