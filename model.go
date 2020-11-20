@@ -1,6 +1,12 @@
 package main
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/spf13/viper"
+)
 
 type Task struct {
 	ID         int    `json:"id"`
@@ -8,31 +14,54 @@ type Task struct {
 }
 
 type TaskModel struct {
-	tasks        []Task
+	db           *gorm.DB
 	currentIndex int
 }
 
 func (tm *TaskModel) AddTask(description string) {
 	ts := Task{
-		ID:         tm.currentIndex,
 		Desciption: description,
 	}
-	tm.currentIndex++
-	tm.tasks = append(tm.tasks, ts)
+	tm.db.Create(&ts)
 }
 
 func (tm *TaskModel) DeleteTask(id int) {
-	tm.tasks = append(tm.tasks[:id], tm.tasks[id+1:]...)
+	tm.db.Delete(&Task{}, id)
 }
 
 func (tm *TaskModel) ToJSON() []byte {
-	bytes, _ := json.Marshal(tm.tasks)
+	tasks := []Task{}
+	tm.db.Find(&tasks)
+	bytes, _ := json.Marshal(tasks)
 	return bytes
 }
 
 func NewTaskModel() TaskModel {
+	viper.SetConfigName("dbconfig")
+	viper.AddConfigPath("./")
+	err := viper.ReadInConfig()
+
+	if err != nil {
+		panic(err)
+	}
+
+	viper.SetDefault("user", "root")
+	viper.SetDefault("pass", "root")
+	viper.SetDefault("address", "localhost:3306")
+
+	user := viper.GetString("user")
+	pass := viper.GetString("pass")
+	address := viper.GetString("address")
+
+	db, err := gorm.Open("mysql", user+":"+pass+"@tcp("+address+")/monitadb?charset=utf8&parseTime=True")
+
+	if err != nil {
+		panic(err)
+	}
+
+	db.AutoMigrate(&Task{})
 	return TaskModel{
 		currentIndex: 0,
-		tasks:        []Task{},
+		db:           db,
 	}
 }

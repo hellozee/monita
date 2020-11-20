@@ -35,8 +35,6 @@ func init() {
 }
 
 func main() {
-	l := log.New(os.Stdout, "todo-api", log.LstdFlags)
-
 	sm := mux.NewRouter()
 
 	getRouter := sm.Methods("GET").Subrouter()
@@ -68,8 +66,7 @@ func main() {
 	signal.Notify(sigChan, os.Interrupt)
 	signal.Notify(sigChan, os.Kill)
 
-	sig := <-sigChan
-	l.Println("Terminating Server ", sig)
+	<-sigChan
 	tc, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	s.Shutdown(tc)
 	cancel()
