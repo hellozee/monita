@@ -1,0 +1,41 @@
+version: "3.3"
+
+services:
+  db:
+    container_name: monitadb
+    image: mysql:5.7
+    hostname: db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: monitadb
+      MYSQL_USER: monita
+      MYSQL_PASSWORD: pass
+    ports:
+      - 3306:3306
+
+    networks:
+      - monitanet
+
+  monitaapi:
+    container_name: monitaapi
+    image: hellozee/monitaapi:v1
+    hostname: monitaapi
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      GET_HOSTS_FROM: dns
+    networks:
+      - monitanet
+    volumes:
+      - .:/go/src/monita
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    links:
+      - db
+
+networks:
+  monitanet:
+    driver: bridge
