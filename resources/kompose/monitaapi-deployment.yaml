@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.service.type: LoadBalancer
+    kompose.version: 1.22.0 (955b78124)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: monitaapi
+  name: monitaapi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: monitaapi
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.service.type: LoadBalancer
+        kompose.version: 1.22.0 (955b78124)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/monitanet: "true"
+        io.kompose.service: monitaapi
+    spec:
+      containers:
+        - env:
+            - name: GET_HOSTS_FROM
+              value: dns
+          image: hellozee/monitaapi:v1
+          name: monitaapi
+          ports:
+            - containerPort: 8080
+          resources: {}
+          volumeMounts:
+            - mountPath: /go/src/monita
+              name: monitaapi-claim0
+      hostname: monitaapi
+      restartPolicy: Always
+      volumes:
+        - name: monitaapi-claim0
+          persistentVolumeClaim:
+            claimName: monitaapi-claim0
+status: {}
