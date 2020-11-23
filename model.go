@@ -60,6 +60,11 @@ func NewTaskModel() TaskModel {
 	}
 
 	db.AutoMigrate(&Task{})
+
+	tasks := []Task{}
+	db.Find(&tasks)
+	dbEntries.Set(float64(len(tasks)))
+
 	return TaskModel{
 		currentIndex: 0,
 		db:           db,

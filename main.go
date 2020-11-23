@@ -27,11 +27,21 @@ var (
 		},
 		[]string{"type"},
 	)
+
+	dbEntries = prometheus.NewGauge(
+		prometheus.GaugeOpts{
+			Namespace: "monita",
+			Subsystem: "db",
+			Name:      "entries",
+			Help:      "Total number of entries in the database",
+		},
+	)
 )
 
 func init() {
 	Tasks = NewTaskModel()
 	prometheus.MustRegister(requestsCounter)
+	prometheus.MustRegister(dbEntries)
 }
 
 func main() {
@@ -83,6 +93,7 @@ func addItem(rw http.ResponseWriter, rq *http.Request) {
 	Tasks.AddTask(string(bytes))
 	rw.WriteHeader(http.StatusOK)
 	requestsCounter.WithLabelValues("add_item").Inc()
+	dbEntries.Inc()
 }
 
 func deleteItem(rw http.ResponseWriter, rq *http.Request) {
@@ -91,4 +102,5 @@ func deleteItem(rw http.ResponseWriter, rq *http.Request) {
 	Tasks.DeleteTask(id)
 	rw.WriteHeader(http.StatusOK)
 	requestsCounter.WithLabelValues("delete_item").Inc()
+	dbEntries.Dec()
 }
