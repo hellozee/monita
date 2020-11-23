@@ -63,8 +63,22 @@ services:
       - monitaapi
     volumes:
       - ./resources/docker/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./resources/docker/alert.rules.yml:/etc/prometheus/alert.rules.yml
     labels:
       kompose.service.type: LoadBalancer
+
+  alertmanager:
+    container_name: alertmanager_monita
+    image: prom/alertmanager
+    hostname: alertmanager
+    environment:
+      GET_HOSTS_FROM: dns
+    ports:
+      - 9093:9093
+    networks:
+      - monitanet
+    depends_on:
+      - prometheus
 
 networks:
   monitanet:
