@@ -80,6 +80,15 @@ services:
     depends_on:
       - prometheus
 
+  grafana:
+    container_name: grafana_monita
+    image: grafana/grafana
+    hostname: graphana
+    ports:
+      - 3000:3000
+    networks:
+      - monitanet
+
 networks:
   monitanet:
     driver: bridge
