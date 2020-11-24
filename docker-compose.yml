@@ -11,7 +11,7 @@ services:
       MYSQL_USER: monita
       MYSQL_PASSWORD: pass
     volumes:
-      - ./resources/docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./resources/docker/init.sql:/docker-entrypoint-initdb.d/1.sql
 
     networks:
       - monitanet
@@ -67,6 +67,15 @@ services:
     labels:
       kompose.service.type: LoadBalancer
 
+  prom_receiver:
+    container_name: prom_receiver
+    image: hellozee/prom-receiver
+    hostname: prom_receiver
+    environment:
+      GET_HOSTS_FROM: dns
+    networks:
+      - monitanet
+
   alertmanager:
     container_name: alertmanager_monita
     image: prom/alertmanager
@@ -75,10 +84,13 @@ services:
       GET_HOSTS_FROM: dns
     ports:
       - 9093:9093
+    volumes:
+      - ./resources/docker/alertmanager.yml:/etc/alertmanager/alertmanager.yml
     networks:
       - monitanet
     depends_on:
       - prometheus
+      - prom_receiver
 
   grafana:
     container_name: grafana_monita
