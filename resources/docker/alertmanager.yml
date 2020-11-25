@@ -10,7 +10,7 @@ route:
 receivers:
   - name: "web.hook"
     webhook_configs:
-      - url: "http://prom_receiver:5001"
+      - url: "http://promreceiver:5001"
 inhibit_rules:
   - source_match:
       severity: "critical"

@@ -33,8 +33,6 @@ services:
       - 8080:8080
     depends_on:
       - db
-    labels:
-      kompose.service.type: LoadBalancer
 
   mysqlexporter:
     container_name: mysqlexporter
@@ -64,13 +62,11 @@ services:
     volumes:
       - ./resources/docker/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./resources/docker/alert.rules.yml:/etc/prometheus/alert.rules.yml
-    labels:
-      kompose.service.type: LoadBalancer
 
   prom_receiver:
     container_name: prom_receiver
     image: hellozee/prom-receiver
-    hostname: prom_receiver
+    hostname: promreceiver
     environment:
       GET_HOSTS_FROM: dns
     networks:
