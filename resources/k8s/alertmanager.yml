@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alertmanager
+  template:
+    metadata:
+      labels:
+        app: alertmanager
+    spec:
+      containers:
+        - name: alertmanager-container
+          image: prom/alertmanager
+          ports:
+            - containerPort: 9093
+              name: http
+          volumeMounts:
+            - mountPath: /etc/alertmanager
+              name: alertmanager-config
+      volumes:
+        - name: alertmanager-config
+          hostPath:
+            path: /resources/alertmanager
+            type: Directory
