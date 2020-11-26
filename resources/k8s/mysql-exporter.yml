@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-exporter-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysqlexporter
+  template:
+    metadata:
+      labels:
+        app: mysqlexporter
+    spec:
+      containers:
+        - name: mysqlexporter-container
+          image: prom/mysqld-exporter
+          ports:
+            - containerPort: 9104
+              name: http
+          env:
+            - name: DATA_SOURCE_NAME
+              value: "monita:pass@(db:3306)/"

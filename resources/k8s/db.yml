@@ -26,3 +26,12 @@ spec:
               value: "monita"
             - name: MYSQL_PASSWORD
               value: "pass"
+          volumeMounts:
+            - mountPath: /docker-entrypoint-initdb.d/1.sql
+              name: db-init
+
+      volumes:
+        - name: db-init
+          hostPath:
+            path: /resources/mysql/init.sql
+            type: File
