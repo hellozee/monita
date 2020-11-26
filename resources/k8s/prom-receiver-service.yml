@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Service
+apiVersion: v1
+metadata:
+  name: promreceiver
+spec:
+  selector:
+    app: promreceiver
+  ports:
+    - protocol: TCP
+      port: 5001
+  type: ClusterIP

@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prom-receiver-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: promreceiver
+  template:
+    metadata:
+      labels:
+        app: promreceiver
+    spec:
+      containers:
+        - name: promreceiver-container
+          image: hellozee/prom-receiver
+          ports:
+            - containerPort: 5001
+              name: http
