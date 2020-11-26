@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monita-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: monita
+  template:
+    metadata:
+      labels:
+        app: monita
+    spec:
+      containers:
+        - name: monita-container
+          image: hellozee/monitaapi
+          ports:
+            - containerPort: 8080
+              name: http
