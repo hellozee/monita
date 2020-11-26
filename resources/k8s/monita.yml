@@ -6,11 +6,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: monita
+      app: monitaapi
   template:
     metadata:
       labels:
-        app: monita
+        app: monitaapi
     spec:
       containers:
         - name: monita-container

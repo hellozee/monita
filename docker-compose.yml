@@ -11,7 +11,7 @@ services:
       MYSQL_USER: monita
       MYSQL_PASSWORD: pass
     volumes:
-      - ./resources/docker/init.sql:/docker-entrypoint-initdb.d/1.sql
+      - ./resources/docker/mysql/init.sql:/docker-entrypoint-initdb.d/1.sql
 
     networks:
       - monitanet
@@ -60,8 +60,8 @@ services:
       - mysqlexporter
       - monitaapi
     volumes:
-      - ./resources/docker/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./resources/docker/alert.rules.yml:/etc/prometheus/alert.rules.yml
+      - ./resources/docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./resources/docker/prometheus/alert.rules.yml:/etc/prometheus/alert.rules.yml
 
   prom_receiver:
     container_name: prom_receiver
@@ -81,7 +81,7 @@ services:
     ports:
       - 9093:9093
     volumes:
-      - ./resources/docker/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - ./resources/docker/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
     networks:
       - monitanet
     depends_on:

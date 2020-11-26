@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Service
+apiVersion: v1
+metadata:
+  name: monitaapi
+spec:
+  selector:
+    app: monitaapi
+  ports:
+    - protocol: TCP
+      port: 8080
+  type: ClusterIP

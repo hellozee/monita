@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+        - name: prometheus
+          image: prom/prometheus
+          ports:
+            - containerPort: 9090
+              name: http
+          volumeMounts:
+            - mountPath: /etc/prometheus
+              name: prometheus-config
+      volumes:
+        - name: prometheus-config
+          hostPath:
+            path: /resources/prometheus
+            type: Directory
